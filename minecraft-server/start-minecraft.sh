@@ -137,7 +137,7 @@ function installForge {
       ;;
 
     *)
-      FORGE_VERSION=$FORGEVERSION
+      FORGE_VERSION=$FORGE_VERSION
       ;;
   esac
 
@@ -509,8 +509,8 @@ else
     # If we have a bootstrap.txt file... feed that in to the server stdin
     if [ -f /data/bootstrap.txt ];
     then
-        exec java "$JVM_XX_OPTS" "$JVM_OPTS" -jar $SERVER "$@" $EXTRA_ARGS < /data/bootstrap.txt
+        exec java $JVM_XX_OPTS $JVM_OPTS -jar $SERVER "$@" $EXTRA_ARGS < /data/bootstrap.txt
     else
-        exec java "$JVM_XX_OPTS" "$JVM_OPTS" -jar $SERVER "$@" $EXTRA_ARGS
+        exec java $JVM_XX_OPTS $JVM_OPTS -jar $SERVER "$@" $EXTRA_ARGS
     fi
 fi
