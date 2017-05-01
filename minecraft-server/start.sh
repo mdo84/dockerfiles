@@ -7,10 +7,10 @@ sed -i "/^minecraft/s/:1000:/:${GID}:/g" /etc/group
 if [ "$SKIP_OWNERSHIP_FIX" != "TRUE" ]; then
   fix_ownership() {
     dir=$1
-    if ! su-exec minecraft test -w $dir; then
+    if ! su-exec minecraft test -w "$dir"; then
       echo "Correcting writability of $dir ..."
-      chown -R minecraft:minecraft $dir
-      chmod -R u+w $dir
+      chown -R minecraft:minecraft "$dir"
+      chmod -R u+w "$dir"
     fi
   }
 
@@ -19,4 +19,4 @@ if [ "$SKIP_OWNERSHIP_FIX" != "TRUE" ]; then
 fi
 
 echo "Switching to user 'minecraft'"
-su-exec minecraft /start-minecraft $@
+su-exec minecraft /start-minecraft "$@"
