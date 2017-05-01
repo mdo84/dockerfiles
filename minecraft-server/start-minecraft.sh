@@ -122,13 +122,13 @@ function installForge {
   norm=$VANILLA_VERSION
 
   echo "Checking Forge version information."
-  case $FORGEVERSION in
+  case $FORGE_VERSION in
     RECOMMENDED)
       curl -fsSL -o /tmp/forge.json http://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json
-      FORGE_VERSION=$(cat /tmp/forge.json | jq -r ".promos[\"$norm-recommended\"]")
-      if [ $FORGE_VERSION = null ]; then
-        FORGE_VERSION=$(cat /tmp/forge.json | jq -r ".promos[\"$norm-latest\"]")
-        if [ $FORGE_VERSION = null ]; then
+      FORGE_VERSION=$(jq -r ".promos[\"${norm}-recommended\"]" < /tmp/forge.json)
+      if [ "$FORGE_VERSION" = null ]; then
+        FORGE_VERSION=$(jq -r ".promos[\"${norm}-latest\"]" < /tmp/forge.json)
+        if [ "$FORGE_VERSION" = null ]; then
           echo "ERROR: Version $FORGE_VERSION is not supported by Forge"
           echo "       Refer to http://files.minecraftforge.net/ for supported versions"
           exit 2
