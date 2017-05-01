@@ -23,16 +23,16 @@ VERSIONS_JSON=https://launchermeta.mojang.com/mc/game/version_manifest.json
 echo "Checking version information."
 case "X$VERSION" in
   X|XLATEST|Xlatest)
-    VANILLA_VERSION=`curl -fsSL $VERSIONS_JSON | jq -r '.latest.release'`
+    VANILLA_VERSION=$(curl -fsSL $VERSIONS_JSON | jq -r '.latest.release')
   ;;
   XSNAPSHOT|Xsnapshot)
-    VANILLA_VERSION=`curl -fsSL $VERSIONS_JSON | jq -r '.latest.snapshot'`
+    VANILLA_VERSION=$(curl -fsSL $VERSIONS_JSON | jq -r '.latest.snapshot')
   ;;
   X[1-9]*)
     VANILLA_VERSION=$VERSION
   ;;
   *)
-    VANILLA_VERSION=`curl -fsSL $VERSIONS_JSON | jq -r '.latest.release'`
+    VANILLA_VERSION=$(curl -fsSL $VERSIONS_JSON | jq -r '.latest.release')
   ;;
 esac
 
@@ -43,7 +43,7 @@ function buildSpigotFromSource {
   mkdir /data/temp
   cd /data/temp
   wget -q -P /data/temp https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar && \
-    java -jar /data/temp/BuildTools.jar --rev $VANILLA_VERSION 2>&1 |tee /data/spigot_build.log| while read l; do echo -n .; done; echo "done"
+    java -jar /data/temp/BuildTools.jar --rev "$VANILLA_VERSION" 2>&1 |tee /data/spigot_build.log| while read l; do echo -n .; done; echo "done"
   mv spigot-*.jar /data/spigot_server.jar
   mv craftbukkit-*.jar /data/craftbukkit_server.jar
   echo "Cleaning up"
@@ -75,9 +75,9 @@ function downloadSpigot {
   fi
 
   echo "Downloading $match"
-  curl -fsSL -o $SERVER "$downloadUrl"
+  curl -fsSL -o "$SERVER" "$downloadUrl"
   status=$?
-  if [ ! -f $SERVER ]; then
+  if [ ! -f "$SERVER" ]; then
     echo "ERROR: failed to download from $downloadUrl (status=$status)"
     exit 3
   fi
@@ -102,10 +102,10 @@ function downloadPaper {
   esac
 
   if [ $build != "nosupp" ]; then
-    rm $SERVER
+    rm "$SERVER"
     downloadUrl=${PAPER_DOWNLOAD_URL:-https://ci.destroystokyo.com/job/PaperSpigot/$build/artifact/paperclip.jar}
-    curl -fsSL -o $SERVER "$downloadUrl"
-    if [ ! -f $SERVER ]; then
+    curl -fsSL -o "$SERVER" "$downloadUrl"
+    if [ ! -f "$SERVER" ]; then
       echo "ERROR: failed to download from $downloadUrl (status=$?)"
       exit 3
     fi
@@ -142,7 +142,7 @@ function installForge {
   esac
 
   # URL format changed for 1.7.10 from 10.13.2.1300
-  sorted=$( (echo $FORGE_VERSION; echo 10.13.2.1300) | sort | head -1)
+  sorted=$( (echo "$FORGE_VERSION"; echo 10.13.2.1300) | sort | head -1)
   if [[ $norm == '1.7.10' && $sorted == '10.13.2.1300' ]]; then
       # if $FORGEVERSION >= 10.13.2.1300
       normForgeVersion="$norm-$FORGE_VERSION-$norm"
@@ -157,9 +157,9 @@ function installForge {
 
   if [ ! -e "$SERVER" ]; then
     echo "Downloading $FORGE_INSTALLER ..."
-    wget -q $downloadUrl
+    wget -q "$downloadUrl"
     echo "Installing $SERVER"
-    java -jar $FORGE_INSTALLER --installServer
+    java -jar "$FORGE_INSTALLER" --installServer
   fi
 }
 
@@ -195,7 +195,7 @@ function installFTB {
   echo "Unpacking FTB server modpack ${srv_modpack} ..."
   local ftb_dir=/data/FeedTheBeast
   mkdir -p ${ftb_dir}
-  unzip -o ${srv_modpack} -d ${ftb_dir}
+  unzip -o "${srv_modpack}" -d "${ftb_dir}"
   cp -f /data/eula.txt ${ftb_dir}/eula.txt
   FTB_SERVER_START=${ftb_dir}/ServerStart.sh
   chmod a+x ${FTB_SERVER_START}
@@ -204,9 +204,9 @@ function installFTB {
 function installVanilla {
   SERVER="minecraft_server.$VANILLA_VERSION.jar"
 
-  if [ ! -e $SERVER ]; then
+  if [ ! -e "$SERVER" ]; then
     echo "Downloading $SERVER ..."
-    wget -q https://s3.amazonaws.com/Minecraft.Download/versions/$VANILLA_VERSION/$SERVER
+    wget -q https://s3.amazonaws.com/Minecraft.Download/versions/"$VANILLA_VERSION"/"$SERVER"
   fi
 }
 
@@ -279,8 +279,8 @@ case "X$WORLD" in
       echo World directory not found
       for i in /data/*/level.dat; do
         if [ -f "$i" ]; then
-          d=`dirname "$i"`
-          echo Renaming world directory from $d
+          d=$(dirname "$i")
+          echo Renaming world directory from "$d"
           mv -f "$d" /data/world
         fi
       done
@@ -369,7 +369,7 @@ if [ ! -e server.properties ]; then
 
   if [ -n "$LEVEL_TYPE" ]; then
     # normalize to uppercase
-    LEVEL_TYPE=$( echo ${LEVEL_TYPE} | tr '[:lower:]' '[:upper:]' )
+    LEVEL_TYPE=$( echo "${LEVEL_TYPE}" | tr '[:lower:]' '[:upper:]' )
     echo "Setting level type to $LEVEL_TYPE"
     # check for valid values and only then set
     case $LEVEL_TYPE in
@@ -408,7 +408,7 @@ if [ ! -e server.properties ]; then
 
   if [ -n "$MODE" ]; then
     echo "Setting mode"
-    MODE_LC=$( echo $MODE | tr '[:upper:]' '[:lower:]' )
+    MODE_LC=$( echo "$MODE" | tr '[:upper:]' '[:lower:]' )
     case $MODE_LC in
       0|1|2|3)
         ;;
@@ -437,18 +437,18 @@ fi
 
 if [ -n "$OPS" -a ! -e ops.txt.converted ]; then
   echo "Setting ops"
-  echo $OPS | awk -v RS=, '{print}' >> ops.txt
+  echo "$OPS" | awk -v RS=, '{print}' >> ops.txt
 fi
 
 if [ -n "$WHITELIST" -a ! -e white-list.txt.converted ]; then
   echo "Setting whitelist"
-  echo $WHITELIST | awk -v RS=, '{print}' >> white-list.txt
+  echo "$WHITELIST" | awk -v RS=, '{print}' >> white-list.txt
 fi
 
 if [ -n "$ICON" -a ! -e server-icon.png ]; then
   echo "Using server icon from $ICON..."
   # Not sure what it is yet...call it "img"
-  wget -q -O /tmp/icon.img $ICON
+  wget -q -O /tmp/icon.img "$ICON"
   specs=$(identify /tmp/icon.img | awk '{print $2,$3}')
   if [ "$specs" = "PNG 64x64" ]; then
     mv /tmp/icon.img /data/server-icon.png
@@ -471,7 +471,7 @@ fi
 for m in /mods/*.jar
 do
   if [ -f "$m" ]; then
-    echo Copying mod `basename "$m"`
+    echo Copying mod "$(basename "$m")"
     cp -f "$m" /data/mods
   fi
 done
@@ -479,7 +479,7 @@ done
 for c in /config/*
 do
   if [ -f "$c" ]; then
-    echo Copying configuration `basename "$c"`
+    echo Copying configuration "$(basename "$c")"
     cp -rf "$c" /data/config
   fi
 done
@@ -509,8 +509,8 @@ else
     # If we have a bootstrap.txt file... feed that in to the server stdin
     if [ -f /data/bootstrap.txt ];
     then
-        exec java $JVM_XX_OPTS $JVM_OPTS -jar $SERVER "$@" $EXTRA_ARGS < /data/bootstrap.txt
+        exec java "$JVM_XX_OPTS" "$JVM_OPTS" -jar $SERVER "$@" $EXTRA_ARGS < /data/bootstrap.txt
     else
-        exec java $JVM_XX_OPTS $JVM_OPTS -jar $SERVER "$@" $EXTRA_ARGS
+        exec java "$JVM_XX_OPTS" "$JVM_OPTS" -jar $SERVER "$@" $EXTRA_ARGS
     fi
 fi
